@@ -1,0 +1,137 @@
+#!/usr/bin/env bash
+
+script=$(basename $0)
+db_dir=$HOME/.todo-cli
+db_name=todo.sqlite
+db_path=$db_dir/$db_name
+cmd=sqlite3
+cmd_bare="$cmd $db_path"
+cmd_with_opts="$cmd -header $db_path"
+schema="CREATE TABLE todo (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  date TEXT DEFAULT CURRENT_DATE,
+  todo TEXT,
+  done BOOLEAN DEFAULT 0 CHECK (done IN (0,1))
+);"
+schema_path=$db_dir/schema.sql
+
+usage="Usage:
+  $script <command>
+
+Commands:
+  h, help                 Show this help
+  l, list [-a]            List undone todos. If -a given, list all todos
+  a, add <todo>           Add a todo
+  e, edit <id> <todo>     Edit a todo
+  d, done <id>            Done a todo
+  u, undone <id>          Undone a todo
+  r, remove <id>          Remove a todo
+  w, wipe                 Wipe all todos
+  n, nuke                 Nuke and recreate todo database"
+
+log_error() { echo -e "ERROR: $@" >&2; }
+
+initialize() {
+  if ! command -v sqlite3 >/dev/null; then
+    log_error "sqlite3 is required"; exit 1
+  fi
+  [[ -d $db_dir ]] || mkdir -p $db_dir
+  if ! [[ -f $db_path ]]; then
+    echo "$schema" > $schema_path
+    $cmd_bare < $schema_path
+  fi
+}
+
+check_id_arg() {
+  if [[ -z $1 ]]; then
+    log_error "id must be specified"; exit 1
+  elif ! [[ $1 =~ ^[0-9]+$ ]]; then
+    log_error "id must be a number"; exit 1
+  fi
+}
+
+check_todo_arg() {
+  if [[ -z "$@" ]]; then
+    log_error "todo must be specified"; exit 1
+  fi
+}
+
+todo_list() {
+  if [[ $1 == "-a" ]]; then
+    $cmd_with_opts "SELECT id, date, todo, CASE WHEN done = 0 THEN 'undone' ELSE 'done' END AS status FROM todo;" \
+    | awk 'NR == 2 {print "--|----|----|------"} {print $0}' \
+    | column -t -s '|'
+  else
+    $cmd_with_opts "SELECT id, date, todo FROM todo WHERE done = 0;" \
+    | awk 'NR == 2 {print "--|----|----"} {print $0}' \
+    | column -t -s '|'
+  fi
+}
+
+todo_add() {
+  check_todo_arg "$@"
+  local todo="$@"
+  $cmd_bare "INSERT INTO todo (todo) VALUES ('$todo');"
+  echo "Added '$todo'"
+}
+
+todo_edit() {
+  check_id_arg $1
+  local id=$1
+  shift
+  check_todo_arg "$@"
+  local old="$($cmd_bare "SELECT todo FROM todo WHERE id = $id;")"
+  local todo="$@"
+  $cmd_bare "UPDATE todo SET date = date('now'), todo = '$todo' WHERE id = $id;"
+  echo "Edited '$old' to be '$todo'"
+}
+
+todo_done() {
+  check_id_arg $1
+  local id=$1
+  local old="$($cmd_bare "SELECT todo FROM todo WHERE id = $id;")"
+  $cmd_bare "UPDATE todo SET done = 1 WHERE id = $id;"
+  echo "Done '$old'"
+}
+
+todo_undone() {
+  check_id_arg $1
+  local id=$1
+  local old="$($cmd_bare "SELECT todo FROM todo WHERE id = $id;")"
+  $cmd_bare "UPDATE todo SET done = 0 WHERE id = $id;"
+  echo "Undone '$old'"
+}
+
+todo_remove() {
+  check_id_arg $1
+  local id="$1"
+  local old="$($cmd_bare "SELECT todo FROM todo WHERE id = $id;")"
+  $cmd_bare "DELETE FROM todo WHERE id = $id;"
+  echo "Removed '$old'"
+}
+
+todo_wipe() {
+  $cmd_bare "DELETE FROM todo;"
+  echo "Todos wiped"
+}
+
+todo_nuke() {
+  rm -f $db_path
+  initialize
+  echo "Todo database nuked and recreated"
+}
+
+initialize
+
+case $1 in
+  h|help) echo "$usage" ;;
+  l|list) shift; todo_list "$@" ;;
+  a|add) shift; todo_add "$@" ;;
+  e|edit) shift; todo_edit "$@" ;;
+  d|done) shift; todo_done "$@" ;;
+  u|undone) shift; todo_undone "$@" ;;
+  r|remove) shift; todo_remove $1 ;;
+  w|wipe) todo_wipe ;;
+  n|nuke) todo_nuke ;;
+  *) echo -e "For help, run: $script help" ;;
+esac
