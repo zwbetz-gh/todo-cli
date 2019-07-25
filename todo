@@ -48,6 +48,10 @@ check_id_arg() {
   elif ! [[ $1 =~ ^[0-9]+$ ]]; then
     log_error "id must be a number"; exit 1
   fi
+  local record=$($cmd_bare "SELECT id FROM todo WHERE id = $1;")
+  if [[ -z $record ]]; then
+    log_error "id must exist"; exit 1
+  fi
 }
 
 check_todo_arg() {
@@ -56,9 +60,18 @@ check_todo_arg() {
   fi
 }
 
+sanitize_todo_arg() {
+  echo "$@" | sed "s/'/''/g"
+}
+
+get_old_todo() {
+  local id=$1
+  $cmd_bare "SELECT todo FROM todo WHERE id = $id;"
+}
+
 todo_list() {
   if [[ $1 == "-a" ]]; then
-    $cmd_with_opts "SELECT id, date, todo, CASE WHEN done = 0 THEN 'undone' ELSE 'done' END AS status FROM todo;" \
+    $cmd_with_opts "SELECT id, date, CASE WHEN done = 0 THEN '[ ]' ELSE '[x]' END AS done, todo FROM todo;" \
     | awk 'NR == 2 {print "--|----|----|------"} {print $0}' \
     | column -t -s '|'
   else
@@ -71,7 +84,8 @@ todo_list() {
 todo_add() {
   check_todo_arg "$@"
   local todo="$@"
-  $cmd_bare "INSERT INTO todo (todo) VALUES ('$todo');"
+  local sanitized="$(sanitize_todo_arg "$@")"
+  $cmd_bare "INSERT INTO todo (todo) VALUES ('$sanitized');"
   echo "Added '$todo'"
 }
 
@@ -80,16 +94,17 @@ todo_edit() {
   local id=$1
   shift
   check_todo_arg "$@"
-  local old="$($cmd_bare "SELECT todo FROM todo WHERE id = $id;")"
+  local old="$(get_old_todo $id)"
   local todo="$@"
-  $cmd_bare "UPDATE todo SET date = date('now'), todo = '$todo' WHERE id = $id;"
+  local sanitized="$(sanitize_todo_arg "$@")"
+  $cmd_bare "UPDATE todo SET date = DATE('now'), todo = '$sanitized' WHERE id = $id;"
   echo "Edited '$old' to be '$todo'"
 }
 
 todo_done() {
   check_id_arg $1
   local id=$1
-  local old="$($cmd_bare "SELECT todo FROM todo WHERE id = $id;")"
+  local old="$(get_old_todo $id)"
   $cmd_bare "UPDATE todo SET done = 1 WHERE id = $id;"
   echo "Done '$old'"
 }
@@ -97,7 +112,7 @@ todo_done() {
 todo_undone() {
   check_id_arg $1
   local id=$1
-  local old="$($cmd_bare "SELECT todo FROM todo WHERE id = $id;")"
+  local old="$(get_old_todo $id)"
   $cmd_bare "UPDATE todo SET done = 0 WHERE id = $id;"
   echo "Undone '$old'"
 }
@@ -105,20 +120,20 @@ todo_undone() {
 todo_remove() {
   check_id_arg $1
   local id="$1"
-  local old="$($cmd_bare "SELECT todo FROM todo WHERE id = $id;")"
+  local old="$(get_old_todo $id)"
   $cmd_bare "DELETE FROM todo WHERE id = $id;"
   echo "Removed '$old'"
 }
 
 todo_wipe() {
   $cmd_bare "DELETE FROM todo;"
-  echo "Todos wiped"
+  echo "Wiped todos"
 }
 
 todo_nuke() {
   rm -f $db_path
   initialize
-  echo "Todo database nuked and recreated"
+  echo "Nuked and recreated todo database"
 }
 
 initialize
