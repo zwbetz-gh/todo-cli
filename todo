@@ -72,7 +72,7 @@ get_old_todo() {
 todo_list() {
   if [[ $1 == "-a" ]]; then
     $cmd_with_opts "SELECT id, date, CASE WHEN done = 0 THEN '[ ]' ELSE '[x]' END AS done, todo FROM todo;" \
-    | awk 'NR == 2 {print "--|----|----|------"} {print $0}' \
+    | awk 'NR == 2 {print "--|----|----|----"} {print $0}' \
     | column -t -s '|'
   else
     $cmd_with_opts "SELECT id, date, todo FROM todo WHERE done = 0;" \

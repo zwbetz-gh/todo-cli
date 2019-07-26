@@ -87,7 +87,7 @@ Undone 'Buy a lot of eggs'
 
 $ todo l -a
 id  date        done  todo
---  ----        ----  ------
+--  ----        ----  ----
 1   2019-07-25  [ ]   Buy milk
 2   2019-07-25  [ ]   Buy a lot of eggs
 3   2019-07-25  [ ]   Refill Millie's tennis balls
