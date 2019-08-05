@@ -39,8 +39,8 @@ Commands:
   d, done <id>            Done a todo
   u, undone <id>          Undone a todo
   r, remove <id>          Remove a todo
-  w, wipe                 Wipe all todos
-  n, nuke                 Nuke and recreate todo database
+  wipe                    Wipe all todos
+  nuke                    Nuke and recreate todo database
 ```
 
 ## Examples

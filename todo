@@ -26,8 +26,8 @@ Commands:
   d, done <id>            Done a todo
   u, undone <id>          Undone a todo
   r, remove <id>          Remove a todo
-  w, wipe                 Wipe all todos
-  n, nuke                 Nuke and recreate todo database"
+  wipe                    Wipe all todos
+  nuke                    Nuke and recreate todo database"
 
 log_error() { echo -e "ERROR: $@" >&2; }
 
@@ -146,7 +146,7 @@ case $1 in
   d|done) shift; todo_done "$@" ;;
   u|undone) shift; todo_undone "$@" ;;
   r|remove) shift; todo_remove $1 ;;
-  w|wipe) todo_wipe ;;
-  n|nuke) todo_nuke ;;
+  wipe) todo_wipe ;;
+  nuke) todo_nuke ;;
   *) echo -e "For help, run: $script help" ;;
 esac
