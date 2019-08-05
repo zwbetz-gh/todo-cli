@@ -16,6 +16,8 @@ Get sh*t done via command line
     ```
 1. Add it to your `PATH`
 
+> **Protip:** rename `todo` to `t` for even less typing. 
+
 ### Windows
 
 1. Install [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
@@ -101,9 +103,9 @@ id  date        todo
 1   2019-07-25  Buy milk
 3   2019-07-25  Refill Millie's tennis balls
 
-$ todo w
+$ todo wipe
 Wiped todos
 
-$ todo n
+$ todo nuke
 Nuked and recreated todo database
 ```
