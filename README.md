@@ -48,7 +48,6 @@ Commands:
 ## Examples
 
 ```
-
 $ todo a "Buy milk"
 Added:
   Buy milk
@@ -115,5 +114,4 @@ id  date        todo
 
 $ todo wipe
 Wiped todos
-
 ```
