@@ -48,64 +48,72 @@ Commands:
 ## Examples
 
 ```
-$ todo a Buy milk
-Added 'Buy milk'
 
-$ todo a Buy eggs
-Added 'Buy eggs'
+$ todo a "Buy milk"
+Added:
+  Buy milk
+
+$ todo a "Buy eggs"
+Added:
+  Buy eggs
 
 $ todo a "Refill Millie's tennis balls"
-Added 'Refill Millie's tennis balls'
+Added:
+  Refill Millie's tennis balls
 
 $ todo l
 id  date        todo
 --  ----        ----
-1   2019-07-25  Buy milk
-2   2019-07-25  Buy eggs
-3   2019-07-25  Refill Millie's tennis balls
+1   2019-09-07  Buy milk
+2   2019-09-07  Buy eggs
+3   2019-09-07  Refill Millie's tennis balls
 
-$ todo e 2 Buy a lot of eggs
-Edited 'Buy eggs' to be 'Buy a lot of eggs'
+$ todo e 2 "Buy a lot of eggs"
+Edited:
+  Buy eggs
+To be:
+  Buy a lot of eggs
 
 $ todo l
 id  date        todo
 --  ----        ----
-1   2019-07-25  Buy milk
-2   2019-07-25  Buy a lot of eggs
-3   2019-07-25  Refill Millie's tennis balls
+1   2019-09-07  Buy milk
+2   2019-09-07  Buy a lot of eggs
+3   2019-09-07  Refill Millie's tennis balls
 
 $ todo d 2
-Done 'Buy a lot of eggs'
-
-$ todo l -a
-id  date        done  todo
---  ----        ----  ------
-1   2019-07-25  [ ]   Buy milk
-2   2019-07-25  [x]   Buy a lot of eggs
-3   2019-07-25  [ ]   Refill Millie's tennis balls
-
-$ todo u 2
-Undone 'Buy a lot of eggs'
+Done:
+  Buy a lot of eggs
 
 $ todo l -a
 id  date        done  todo
 --  ----        ----  ----
-1   2019-07-25  [ ]   Buy milk
-2   2019-07-25  [ ]   Buy a lot of eggs
-3   2019-07-25  [ ]   Refill Millie's tennis balls
+1   2019-09-07  [ ]   Buy milk
+2   2019-09-07  [x]   Buy a lot of eggs
+3   2019-09-07  [ ]   Refill Millie's tennis balls
+
+$ todo u 2
+Undone:
+  Buy a lot of eggs
+
+$ todo l -a
+id  date        done  todo
+--  ----        ----  ----
+1   2019-09-07  [ ]   Buy milk
+2   2019-09-07  [ ]   Buy a lot of eggs
+3   2019-09-07  [ ]   Refill Millie's tennis balls
 
 $ todo r 2
-Removed 'Buy a lot of eggs'
+Removed:
+  Buy a lot of eggs
 
 $ todo l
 id  date        todo
 --  ----        ----
-1   2019-07-25  Buy milk
-3   2019-07-25  Refill Millie's tennis balls
+1   2019-09-07  Buy milk
+3   2019-09-07  Refill Millie's tennis balls
 
 $ todo wipe
 Wiped todos
 
-$ todo nuke
-Nuked and recreated todo database
 ```
